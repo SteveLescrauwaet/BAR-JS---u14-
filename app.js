@@ -233,13 +233,23 @@ window.deleteRegistration = async function(slotId, registrationId) {
   }
 };
 
-db.ref(`barEvents/${EVENT_ID}/slots`).on("value", (snapshot) => {
-  const data = snapshot.val() || {};
-  registrations = {};
+// Affiche immédiatement les créneaux, même si la base est encore vide.
+render();
 
-  Object.keys(data).forEach(slotId => {
-    registrations[slotId] = data[slotId]?.registrations || {};
-  });
+db.ref(`barEvents/${EVENT_ID}/slots`).on(
+  "value",
+  (snapshot) => {
+    const data = snapshot.val() || {};
+    registrations = {};
 
-  render();
-});
+    Object.keys(data).forEach(slotId => {
+      registrations[slotId] = data[slotId]?.registrations || {};
+    });
+
+    render();
+  },
+  (error) => {
+    console.error("Firebase read error:", error);
+    showToast("Connexion Firebase impossible. Vérifiez les règles Realtime Database.");
+  }
+);

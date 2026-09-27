@@ -3,9 +3,9 @@
     "barEvents": {
       "$eventId": {
         "slots": {
+          ".read": true,
           "$slotId": {
             "registrations": {
-              ".read": true,
               ".write": true
             }
           }
