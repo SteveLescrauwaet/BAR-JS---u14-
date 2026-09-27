@@ -12,7 +12,7 @@
   <main class="app-shell">
     <header class="hero">
       <div class="logo-wrap">
-        <div class="logo-placeholder">JSD</div>
+        <img src="logo-js-dottignies.png" alt="JS Dottignies" class="club-logo" />
       </div>
       <div>
         <p class="eyebrow">JS DOTTIGNIES</p>
@@ -20,6 +20,12 @@
         <p class="date">Samedi 17 octobre 2026</p>
       </div>
     </header>
+
+    <div class="court-line" aria-hidden="true">
+      <span></span>
+      <div class="ball-mark">🏀</div>
+      <span></span>
+    </div>
 
     <section class="intro card">
       <p>
@@ -29,6 +35,23 @@
     </section>
 
     <section id="slots" class="slots-grid" aria-live="polite"></section>
+
+
+    <section class="reserve-card card">
+      <div class="reserve-header">
+        <div>
+          <p class="reserve-kicker">LISTE DE RÉSERVE</p>
+          <h2>Tous les créneaux sont occupés ?</h2>
+          <p>Je peux accompagner aux heures suivantes :</p>
+        </div>
+      </div>
+
+      <button id="reserveBtn" class="reserve-btn">
+        Indiquer mes disponibilités
+      </button>
+
+      <div id="reserveCount" class="reserve-count"></div>
+    </section>
 
     <section class="admin-entry">
       <button id="adminBtn" class="link-btn">Accès responsable</button>
@@ -58,6 +81,59 @@
 
       <button type="submit" class="primary-btn">Confirmer mon inscription</button>
       <p id="signupError" class="error"></p>
+    </form>
+  </dialog>
+
+
+  <dialog id="reserveDialog">
+    <form id="reserveForm" method="dialog" class="dialog-card">
+      <button type="button" class="close-btn" id="closeReserve" aria-label="Fermer">×</button>
+      <h2>Mes disponibilités</h2>
+      <p class="dialog-help">
+        Sélectionnez un ou plusieurs créneaux où vous pouvez venir en renfort si nécessaire.
+      </p>
+
+      <label>
+        Prénom
+        <input id="reserveFirstName" autocomplete="given-name" required maxlength="50" />
+      </label>
+
+      <label>
+        Nom
+        <input id="reserveLastName" autocomplete="family-name" required maxlength="50" />
+      </label>
+
+      <label>
+        Prénom du joueur <span class="optional">(facultatif)</span>
+        <input id="reservePlayerName" maxlength="50" />
+      </label>
+
+      <fieldset class="availability-fieldset">
+        <legend>Je peux accompagner :</legend>
+
+        <label class="check-option">
+          <input type="checkbox" name="reserveSlot" value="09-12" />
+          <span>09h00 → 12h00</span>
+        </label>
+
+        <label class="check-option">
+          <input type="checkbox" name="reserveSlot" value="12-15" />
+          <span>12h00 → 15h00</span>
+        </label>
+
+        <label class="check-option">
+          <input type="checkbox" name="reserveSlot" value="15-18" />
+          <span>15h00 → 18h00</span>
+        </label>
+
+        <label class="check-option">
+          <input type="checkbox" name="reserveSlot" value="18-fin" />
+          <span>18h00 → fin</span>
+        </label>
+      </fieldset>
+
+      <button type="submit" class="primary-btn">Enregistrer mes disponibilités</button>
+      <p id="reserveError" class="error"></p>
     </form>
   </dialog>
 

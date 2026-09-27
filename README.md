@@ -141,3 +141,7 @@ Lorsqu'un parent clique sur « Je m'inscris » :
 - sinon l'inscription est refusée.
 
 L'espace responsable permet de supprimer une inscription.
+
+
+## Design
+Cette version inclut le logo officiel fourni et un thème noir/rouge basketball.

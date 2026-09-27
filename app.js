@@ -13,11 +13,13 @@ const slots = [
 ];
 
 let registrations = {};
+let reserveRegistrations = {};
 let adminUnlocked = false;
 
 const el = (id) => document.getElementById(id);
 const slotsEl = el("slots");
 const signupDialog = el("signupDialog");
+const reserveDialog = el("reserveDialog");
 const adminDialog = el("adminDialog");
 
 function escapeHtml(value = "") {
@@ -159,6 +161,70 @@ el("signupForm").addEventListener("submit", async (e) => {
   }
 });
 
+
+function reserveEntries() {
+  return Object.entries(reserveRegistrations || {}).map(([id, data]) => ({ id, ...data }));
+}
+
+function slotLabel(slotId) {
+  return slots.find(s => s.id === slotId)?.label || slotId;
+}
+
+function updateReserveCount() {
+  const count = reserveEntries().length;
+  const target = el("reserveCount");
+  if (!target) return;
+
+  target.textContent = count
+    ? `${count} personne${count > 1 ? "s" : ""} disponible${count > 1 ? "s" : ""} en renfort`
+    : "Aucune personne inscrite en renfort pour le moment.";
+}
+
+el("reserveBtn").addEventListener("click", () => {
+  el("reserveForm").reset();
+  el("reserveError").textContent = "";
+  reserveDialog.showModal();
+});
+
+el("closeReserve").addEventListener("click", () => reserveDialog.close());
+
+el("reserveForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const firstName = el("reserveFirstName").value.trim();
+  const lastName = el("reserveLastName").value.trim();
+  const playerName = el("reservePlayerName").value.trim();
+
+  const selectedSlots = [
+    ...document.querySelectorAll('input[name="reserveSlot"]:checked')
+  ].map(input => input.value);
+
+  if (!firstName || !lastName) return;
+
+  if (!selectedSlots.length) {
+    el("reserveError").textContent = "Sélectionnez au moins un créneau.";
+    return;
+  }
+
+  try {
+    const newRef = db.ref(`barEvents/${EVENT_ID}/reserve`).push();
+
+    await newRef.set({
+      firstName,
+      lastName,
+      playerName: playerName || "",
+      slots: selectedSlots,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    reserveDialog.close();
+    showToast("Vos disponibilités ont bien été enregistrées.");
+  } catch (error) {
+    console.error(error);
+    el("reserveError").textContent = "L'enregistrement n'a pas pu être effectué.";
+  }
+});
+
 el("adminBtn").addEventListener("click", () => {
   el("adminPin").value = "";
   el("adminError").textContent = "";
@@ -214,7 +280,46 @@ function renderAdmin() {
       </section>
     `;
   }).join("");
+
+  const reserve = reserveEntries();
+
+  el("adminList").innerHTML += `
+    <section class="reserve-admin">
+      <h3>Renforts disponibles (${reserve.length})</h3>
+
+      ${reserve.length
+        ? reserve.map(r => `
+            <div class="reserve-admin-row">
+              <strong>
+                ${escapeHtml(r.firstName)} ${escapeHtml(r.lastName)}
+                ${r.playerName ? ` – ${escapeHtml(r.playerName)}` : ""}
+              </strong>
+              <small>
+                ${Array.isArray(r.slots) ? r.slots.map(slotLabel).join(" • ") : ""}
+              </small>
+              <button onclick="deleteReserveRegistration('${r.id}')">
+                Supprimer
+              </button>
+            </div>
+          `).join("")
+        : "<p>Aucune disponibilité enregistrée.</p>"
+      }
+    </section>
+  `;
 }
+
+window.deleteReserveRegistration = async function(id) {
+  if (!adminUnlocked) return;
+  if (!confirm("Supprimer cette disponibilité ?")) return;
+
+  try {
+    await db.ref(`barEvents/${EVENT_ID}/reserve/${id}`).remove();
+    showToast("Disponibilité supprimée.");
+  } catch (error) {
+    console.error(error);
+    showToast("Suppression impossible.");
+  }
+};
 
 window.deleteRegistration = async function(slotId, registrationId) {
   if (!adminUnlocked) return;
@@ -235,6 +340,22 @@ window.deleteRegistration = async function(slotId, registrationId) {
 
 // Affiche immédiatement les créneaux, même si la base est encore vide.
 render();
+
+
+db.ref(`barEvents/${EVENT_ID}/reserve`).on(
+  "value",
+  (snapshot) => {
+    reserveRegistrations = snapshot.val() || {};
+    updateReserveCount();
+
+    if (adminUnlocked) {
+      renderAdmin();
+    }
+  },
+  (error) => {
+    console.error("Firebase reserve read error:", error);
+  }
+);
 
 db.ref(`barEvents/${EVENT_ID}/slots`).on(
   "value",

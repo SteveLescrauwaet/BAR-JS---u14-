@@ -9,6 +9,10 @@
               ".write": true
             }
           }
+        },
+        "reserve": {
+          ".read": true,
+          ".write": true
         }
       }
     }
