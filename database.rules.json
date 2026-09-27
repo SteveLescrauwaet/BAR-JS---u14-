@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "barEvents": {
+      "$eventId": {
+        "slots": {
+          "$slotId": {
+            "registrations": {
+              ".read": true,
+              ".write": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

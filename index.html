@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JS Dottignies - Bar U14</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111827">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div class="logo-wrap">
+        <div class="logo-placeholder">JSD</div>
+      </div>
+      <div>
+        <p class="eyebrow">JS DOTTIGNIES</p>
+        <h1>Organisation du bar – U14</h1>
+        <p class="date">Samedi 17 octobre 2026</p>
+      </div>
+    </header>
+
+    <section class="intro card">
+      <p>
+        Choisissez votre créneau et inscrivez-vous. Dès que le nombre de personnes
+        nécessaires est atteint, le créneau est automatiquement fermé.
+      </p>
+    </section>
+
+    <section id="slots" class="slots-grid" aria-live="polite"></section>
+
+    <section class="admin-entry">
+      <button id="adminBtn" class="link-btn">Accès responsable</button>
+    </section>
+  </main>
+
+  <dialog id="signupDialog">
+    <form id="signupForm" method="dialog" class="dialog-card">
+      <button type="button" class="close-btn" id="closeSignup" aria-label="Fermer">×</button>
+      <h2 id="signupTitle">Inscription</h2>
+      <input type="hidden" id="slotId" />
+
+      <label>
+        Prénom
+        <input id="firstName" autocomplete="given-name" required maxlength="50" />
+      </label>
+
+      <label>
+        Nom
+        <input id="lastName" autocomplete="family-name" required maxlength="50" />
+      </label>
+
+      <label>
+        Prénom du joueur <span class="optional">(facultatif)</span>
+        <input id="playerName" maxlength="50" />
+      </label>
+
+      <button type="submit" class="primary-btn">Confirmer mon inscription</button>
+      <p id="signupError" class="error"></p>
+    </form>
+  </dialog>
+
+  <dialog id="adminDialog">
+    <div class="dialog-card">
+      <button type="button" class="close-btn" id="closeAdmin" aria-label="Fermer">×</button>
+      <h2>Espace responsable</h2>
+
+      <div id="adminLogin">
+        <label>
+          Code PIN
+          <input id="adminPin" inputmode="numeric" type="password" maxlength="8" />
+        </label>
+        <button id="adminLoginBtn" class="primary-btn">Se connecter</button>
+        <p id="adminError" class="error"></p>
+      </div>
+
+      <div id="adminPanel" class="hidden">
+        <p class="admin-note">Cliquez sur une inscription pour la supprimer.</p>
+        <div id="adminList"></div>
+      </div>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
