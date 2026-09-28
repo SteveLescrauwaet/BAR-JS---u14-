@@ -4,7 +4,7 @@ Cette version utilise **Firebase Realtime Database** au lieu de Supabase.
 
 ## Créneaux configurés
 
-- 09h00 → 12h00 : 3 personnes
+- 09h00 → 12h00 : 4 personnes
 - 12h00 → 15h00 : 4 personnes
 - 15h00 → 18h00 : 3 personnes
 - 18h00 → fin : 3 personnes

@@ -6,7 +6,7 @@ const db = firebase.database();
 const EVENT_ID = "u14-2026-10-17";
 
 const slots = [
-  { id: "09-12", label: "09h00 → 12h00", quota: 3 },
+  { id: "09-12", label: "09h00 → 12h00", quota: 4 },
   { id: "12-15", label: "12h00 → 15h00", quota: 4 },
   { id: "15-18", label: "15h00 → 18h00", quota: 3 },
   { id: "18-fin", label: "18h00 → fin", quota: 3 }
