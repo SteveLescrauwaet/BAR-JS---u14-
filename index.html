@@ -157,8 +157,8 @@
 
       <div id="adminLogin">
         <label>
-          Code PIN
-          <input id="adminPin" inputmode="numeric" type="password" maxlength="8" />
+          Mot de passe responsable
+          <input id="adminPin" inputmode="numeric" type="password" maxlength="100" autocomplete="off" />
         </label>
         <button id="adminLoginBtn" class="primary-btn">Se connecter</button>
         <p id="adminError" class="error"></p>
@@ -178,8 +178,9 @@
 
   <div id="toast" class="toast" role="status"></div>
 
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="config.js"></script>
   <script src="app.js"></script>
 </body>

@@ -1,15 +1,20 @@
-# JS Dottignies – Organisation du bar, toutes équipes
+# JS Dottignies — Bar multi-équipes (Supabase)
 
-Déployez tous les fichiers à la racine du dépôt GitHub Pages, en conservant config.js (Firebase déjà configuré).
+## 1. Préparer Supabase
+Dans https://supabase.com/dashboard > projet `twsutaticsyjfrbhfgsz` > SQL Editor > New query :
+- Ouvrir `supabase_setup.sql` et **remplacer** `CHANGEZ_CE_MOT_DE_PASSE_AVANT_EXECUTION` par un mot de passe responsable **long et unique** (au moins 16 caractères). Ne pas publier ce fichier modifié sur GitHub.
+- Exécuter le script dans SQL Editor. Les tables, fonctions et autorisations seront créées.
+- Ce mot de passe remplace l'ancien code PIN Firebase, qui n'était pas sécurisé côté serveur.
 
-## Utilisation
+## 2. Déployer sur GitHub Pages
+Sur le dépôt GitHub de l'application, remplacer les fichiers du site par : `index.html`, `app.js`, `config.js`, `style.css`, `manifest.json`, `logo-js-dottignies.png`, `basket-arena-bg.png`. Conserver `supabase_setup.sql` hors des fichiers publiés après avoir défini le vrai mot de passe.
+La connexion à Supabase est déjà renseignée dans `config.js` : URL du projet et **clé publique** publishable uniquement.
 
-La page d’accueil propose les 21 équipes du club et une entrée distincte « U14 – ancien planning (17/10/2026) ». Cette dernière utilise **exactement** le chemin Firebase historique `barEvents/u14-2026-10-17` pour conserver les inscriptions et disponibilités existantes. Les 21 nouvelles équipes utilisent `barEvents/team-<identifiant>` et ne partagent aucune inscription.
+## 3. Fonctionnement
+À l'accueil, choisir parmi les 21 équipes. Dans « Accès responsable », entrer le nouveau mot de passe configuré dans SQL, puis enregistrer la date. Les parents peuvent s'inscrire sur 4 créneaux (4,4,3,3 places) ou proposer un renfort. Les quotas sont garantis par une opération SQL atomique, même en cas d'inscriptions simultanées. Actualisation automatique toutes les 12 secondes.
 
-À la première visite d'une équipe, son planning affiche « Date à définir ». Cliquez sur « Accès responsable », saisissez le PIN existant, puis configurez la date. Les 4 créneaux et leurs quotas restent identiques à la version d'origine. Modifier la date conserve les inscriptions : le responsable doit supprimer les anciennes inscriptions s'il réutilise le planning pour un autre jour.
+## 4. Migration des anciennes données Firebase
+**Attention : la nouvelle base Supabase démarre vide.** Les inscriptions de Firebase ne sont pas automatiquement copiées. L'accès ancien U14 reste disponible dans l'ancien site Firebase si celui-ci est encore actif. Pour importer les données précédentes, il faut un export JSON de la Realtime Database Firebase ; ne pas effacer l'ancienne base avant cet export.
 
-## Firebase
-
-**Important :** publier le nouveau fichier `database.rules.json` dans Firebase > Realtime Database > Rules. Les règles originales autorisaient déjà les inscriptions publiques et ne sécurisaient pas les suppressions côté serveur. Le PIN affiché dans config.js n'est pas une authentification Firebase. La présente version conserve ce fonctionnement : ne considérez pas l'accès responsable comme sécurisé. Pour une mise en production durable, utiliser Firebase Authentication + règles de sécurité serveur et un identifiant d'événement par date afin d'archiver les anciennes permanences.
-
-Après déploiement, vérifier sur téléphone et ordinateur : choix équipe, date, inscription, renfort, suppression en admin, retour accueil et conservation des inscriptions U14 historiques.
+## 5. Sécurité
+Les écritures passent par des fonctions serveur et les tables ne sont pas lisibles directement via REST. Le mot de passe responsable est vérifié côté SQL (empreinte bcrypt). Les listes nominatives des inscriptions sont publiques pour les utilisateurs de l'application, conformément à son usage. Il n'y a pas de compte parent ; prévoir CAPTCHA / anti-abus ou authentification si l'app est exposée largement. Ne jamais mettre une clé `service_role` ou `sb_secret_` dans `config.js`.
