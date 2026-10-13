@@ -3,21 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JS Dottignies - Bar U14</title>
+  <title>JS Dottignies – Organisation du bar</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#111827">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="app-shell">
+  <main id="teamScreen" class="team-screen app-shell">
+    <div class="team-hero"><img src="logo-js-dottignies.png" alt="Logo JS Dottignies" />
+      <p class="eyebrow">JS DOTTIGNIES • ONE TEAM</p>
+      <h1>Organisation du bar</h1><p>Choisissez votre équipe pour consulter son planning et vous inscrire.</p>
+    </div>
+    <section class="card team-picker"><label for="teamSelect">Votre équipe</label>
+      <select id="teamSelect"><option value="">— Sélectionner une équipe —</option></select>
+      <button id="enterTeamBtn" class="primary-btn" disabled>Accéder au planning →</button>
+      <p class="team-hint">Chaque équipe dispose de son planning et de ses inscriptions indépendants.</p>
+    </section>
+  </main>
+  <main id="planningScreen" class="app-shell hidden">
     <header class="hero">
       <div class="logo-wrap">
         <img src="logo-js-dottignies.png" alt="JS Dottignies" class="club-logo" />
       </div>
       <div>
         <p class="eyebrow">JS DOTTIGNIES</p>
-        <h1>Organisation du bar – U14</h1>
-        <p class="date">Samedi 17 octobre 2026</p>
+        <h1 id="teamTitle">Organisation du bar</h1>
+        <p class="date" id="teamDate">Date à définir</p>
+        <button id="changeTeamBtn" class="link-btn" type="button">← Changer d’équipe</button>
       </div>
     </header>
 
@@ -34,6 +46,7 @@
       </p>
     </section>
 
+    <p id="notScheduled" class="card schedule-notice hidden">Cette équipe n’a pas encore de date de permanence. Le responsable peut la définir dans son espace.</p>
     <section id="slots" class="slots-grid" aria-live="polite"></section>
 
 
@@ -152,6 +165,11 @@
       </div>
 
       <div id="adminPanel" class="hidden">
+        <div class="admin-config"><h3>Configuration de cette équipe</h3>
+          <label>Date de tenue du bar <input id="eventDateInput" type="date" /></label>
+          <button id="saveDateBtn" class="primary-btn" type="button">Enregistrer la date</button>
+          <p class="team-hint">Chaque équipe possède un planning actif. Modifier la date ne supprime pas les inscriptions existantes.</p>
+        </div>
         <p class="admin-note">Cliquez sur une inscription pour la supprimer.</p>
         <div id="adminList"></div>
       </div>

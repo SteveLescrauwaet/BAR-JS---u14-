@@ -592,3 +592,21 @@ input:focus {
     font-size: 31px;
   }
 }
+
+/* Accueil multi-équipes */
+.hidden { display: none !important; }
+.team-screen { max-width: 660px; min-height: 100vh; display:flex; flex-direction:column; justify-content:center; gap:24px; }
+.team-hero { text-align:center; padding:24px 10px 0; }
+.team-hero img { display:block; width: min(200px, 55vw); max-height:190px; object-fit:contain; margin:0 auto 16px; }
+.team-hero h1 { margin:10px 0; }
+.team-hero p { color:#dfdfdf; }
+.team-picker { display:flex; flex-direction:column; gap:15px; padding:26px; }
+.team-picker label { font-weight:800; }
+.team-picker select { width:100%; background:#151515; color:white; border:1px solid #575757; border-radius:12px; padding:15px; font:inherit; font-size:17px; }
+.team-picker button { width:100%; }
+.team-hint { color:#aaa; font-size:13px; line-height:1.5; }
+.schedule-notice { text-align:center; color:#f7d7e0; padding:20px; margin:14px 0; }
+.admin-config { background:#1c1c1c; padding:16px; border-radius:12px; margin:12px 0 20px; }
+.admin-config label { display:block; margin:12px 0; }
+.admin-config input { width:100%; margin-top:8px; }
+button:disabled { opacity:0.5; cursor:not-allowed; }

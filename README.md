@@ -1,147 +1,15 @@
-# JS Dottignies – Bar U14 – Version Firebase
+# JS Dottignies – Organisation du bar, toutes équipes
 
-Cette version utilise **Firebase Realtime Database** au lieu de Supabase.
+Déployez tous les fichiers à la racine du dépôt GitHub Pages, en conservant config.js (Firebase déjà configuré).
 
-## Créneaux configurés
+## Utilisation
 
-- 09h00 → 12h00 : 4 personnes
-- 12h00 → 15h00 : 4 personnes
-- 15h00 → 18h00 : 3 personnes
-- 18h00 → fin : 3 personnes
+La page d’accueil propose les 21 équipes du club et une entrée distincte « U14 – ancien planning (17/10/2026) ». Cette dernière utilise **exactement** le chemin Firebase historique `barEvents/u14-2026-10-17` pour conserver les inscriptions et disponibilités existantes. Les 21 nouvelles équipes utilisent `barEvents/team-<identifiant>` et ne partagent aucune inscription.
 
-Le quota est vérifié avec une transaction Firebase :
-même si deux parents cliquent presque exactement en même temps,
-le créneau ne peut pas dépasser son nombre maximum.
+À la première visite d'une équipe, son planning affiche « Date à définir ». Cliquez sur « Accès responsable », saisissez le PIN existant, puis configurez la date. Les 4 créneaux et leurs quotas restent identiques à la version d'origine. Modifier la date conserve les inscriptions : le responsable doit supprimer les anciennes inscriptions s'il réutilise le planning pour un autre jour.
 
----
+## Firebase
 
-# 1. Créer le projet Firebase
+**Important :** publier le nouveau fichier `database.rules.json` dans Firebase > Realtime Database > Rules. Les règles originales autorisaient déjà les inscriptions publiques et ne sécurisaient pas les suppressions côté serveur. Le PIN affiché dans config.js n'est pas une authentification Firebase. La présente version conserve ce fonctionnement : ne considérez pas l'accès responsable comme sécurisé. Pour une mise en production durable, utiliser Firebase Authentication + règles de sécurité serveur et un identifiant d'événement par date afin d'archiver les anciennes permanences.
 
-Allez sur :
-
-https://console.firebase.google.com
-
-Puis :
-
-1. Ajouter un projet
-2. Donnez-lui par exemple le nom `jsdottignies-bar`
-3. Google Analytics n'est pas nécessaire pour cette application.
-
----
-
-# 2. Créer une application Web
-
-Dans Firebase :
-
-Project overview > Ajouter une application > Web `</>`
-
-Donnez-lui un nom, par exemple :
-
-`Bar JS Dottignies`
-
-Firebase vous donnera un bloc semblable à :
-
-```javascript
-const firebaseConfig = {
-  apiKey: "...",
-  authDomain: "...",
-  databaseURL: "...",
-  projectId: "...",
-  storageBucket: "...",
-  messagingSenderId: "...",
-  appId: "..."
-};
-```
-
-Copiez ces valeurs dans le fichier :
-
-`config.js`
-
----
-
-# 3. Activer Realtime Database
-
-Dans Firebase :
-
-Build > Realtime Database
-
-Cliquez sur :
-
-Create Database
-
-Pour la région, choisissez de préférence une région européenne si proposée.
-
----
-
-# 4. Installer les règles
-
-Dans :
-
-Realtime Database > Rules
-
-Remplacez les règles existantes par le contenu du fichier :
-
-`database.rules.json`
-
-Puis cliquez sur :
-
-Publish
-
----
-
-# 5. Code administrateur
-
-Le code est actuellement :
-
-`2502`
-
-Vous pouvez le changer dans :
-
-`config.js`
-
-IMPORTANT :
-le PIN est pratique pour une petite utilisation interne,
-mais il ne constitue pas une authentification sécurisée côté serveur.
-
----
-
-# 6. Mise en ligne sur GitHub Pages
-
-1. Créez un dépôt GitHub.
-2. Déposez à la racine :
-   - index.html
-   - style.css
-   - app.js
-   - config.js
-   - manifest.json
-3. Ouvrez :
-   Settings > Pages
-4. Choisissez :
-   Deploy from a branch
-5. Branche :
-   main
-6. Dossier :
-   /root
-
-GitHub vous donnera ensuite une adresse publique.
-
----
-
-# 7. Fonctionnement
-
-Les parents voient les inscriptions en temps réel.
-
-Lorsqu'un parent clique sur « Je m'inscris » :
-
-- il encode son prénom ;
-- son nom ;
-- éventuellement le prénom du joueur ;
-- Firebase vérifie le quota ;
-- si une place reste disponible, l'inscription est enregistrée ;
-- sinon l'inscription est refusée.
-
-L'espace responsable permet de supprimer une inscription.
-
-
-## Design
-Cette version inclut le logo officiel fourni et un thème noir/rouge basketball.
+Après déploiement, vérifier sur téléphone et ordinateur : choix équipe, date, inscription, renfort, suppression en admin, retour accueil et conservation des inscriptions U14 historiques.

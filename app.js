@@ -3,7 +3,76 @@ const cfg = window.APP_CONFIG;
 firebase.initializeApp(cfg.firebaseConfig);
 const db = firebase.database();
 
-const EVENT_ID = "u14-2026-10-17";
+const TEAMS = [
+  ["u6","U6"], ["u8-a","U8 A"], ["u8-b","U8 B"],
+  ["u10-loups","U10 Loups"], ["u10-lions","U10 Lions"], ["u10-tigres","U10 Tigres"],
+  ["u12-garcons-a","U12 Garçons A"], ["u12-garcons-b","U12 Garçons B"], ["u12-filles","U12 Filles"],
+  ["u14-awbb-garcons","U14 AWBB Garçons"], ["u14-b-garcons","U14 B Garçons"], ["u14-filles","U14 Filles"],
+  ["u16-hommes","U16 Hommes"], ["u16-awbb-dames","U16 AWBB Dames"], ["u16-b-dames","U16 B Dames"],
+  ["u18-hommes","U18 Hommes"], ["u21-hommes","U21 Hommes"],
+  ["p4-hommes","P4 Hommes"], ["p3-hommes","P3 Hommes"], ["p2-hommes","P2 Hommes"],
+  ["veterans","Vétérans"], ["u14-legacy","U14 – ancien planning (17/10/2026)"]
+];
+const OLD_EVENT_ID = "u14-2026-10-17";
+let EVENT_ID = null;
+let currentTeam = null;
+let eventDate = "";
+let listenerSlots = null;
+let listenerReserve = null;
+let listenerMeta = null;
+const eventPath = () => `barEvents/${EVENT_ID}`;
+function showDate(date) {
+  if (!date) return "Date à définir";
+  const day = new Date(`${date}T12:00:00`);
+  return Number.isNaN(day.getTime()) ? "Date à définir" : day.toLocaleDateString("fr-BE", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+}
+function refreshPlanning() {
+  el("teamDate").textContent = showDate(eventDate);
+  el("notScheduled").classList.toggle("hidden", Boolean(eventDate));
+  el("slots").classList.toggle("hidden", !eventDate);
+  el("reserveBtn").disabled = !eventDate;
+  if (adminUnlocked) el("eventDateInput").value = eventDate;
+}
+function stopListeners() {
+  if (listenerSlots) listenerSlots.off();
+  if (listenerReserve) listenerReserve.off();
+  if (listenerMeta) listenerMeta.off();
+  listenerSlots = listenerReserve = listenerMeta = null;
+}
+function openTeam(teamId) {
+  const chosen = TEAMS.find(([id]) => id === teamId);
+  if (!chosen) return;
+  stopListeners();
+  currentTeam = chosen;
+  EVENT_ID = teamId === "u14-legacy" ? OLD_EVENT_ID : `team-${teamId}`;
+  eventDate = teamId === "u14-legacy" ? "2026-10-17" : "";
+  registrations = {}; reserveRegistrations = {}; adminUnlocked = false;
+  el("adminDialog").close();
+  el("teamTitle").textContent = `Organisation du bar – ${chosen[1]}`;
+  el("teamScreen").classList.add("hidden");
+  el("planningScreen").classList.remove("hidden");
+  refreshPlanning(); render(); updateReserveCount();
+  listenerMeta = db.ref(`${eventPath()}/meta`);
+  listenerMeta.on("value", snapshot => {
+    const saved = snapshot.val();
+    eventDate = saved?.date || (teamId === "u14-legacy" ? "2026-10-17" : "");
+    refreshPlanning();
+  }, error => console.error("Metadata Firebase :", error));
+  listenerReserve = db.ref(`${eventPath()}/reserve`);
+  listenerReserve.on("value", snapshot => {
+    reserveRegistrations = snapshot.val() || {};
+    updateReserveCount();
+    if (adminUnlocked) renderAdmin();
+  }, error => console.error("Firebase reserve read error:", error));
+  listenerSlots = db.ref(`${eventPath()}/slots`);
+  listenerSlots.on("value", snapshot => {
+    const data = snapshot.val() || {};
+    registrations = {};
+    Object.keys(data).forEach(slotId => registrations[slotId] = data[slotId]?.registrations || {});
+    render();
+  }, error => { console.error("Firebase read error:", error); showToast("Connexion Firebase impossible. Vérifiez les règles Realtime Database."); });
+}
+
 
 const slots = [
   { id: "09-12", label: "09h00 → 12h00", quota: 4 },
@@ -19,6 +88,16 @@ let adminUnlocked = false;
 const el = (id) => document.getElementById(id);
 const slotsEl = el("slots");
 const signupDialog = el("signupDialog");
+const teamSelect = el("teamSelect");
+TEAMS.forEach(([id,label]) => { const option=document.createElement("option"); option.value=id; option.textContent=label; teamSelect.appendChild(option); });
+teamSelect.addEventListener("change", () => el("enterTeamBtn").disabled = !teamSelect.value);
+el("enterTeamBtn").addEventListener("click", () => openTeam(teamSelect.value));
+el("changeTeamBtn").addEventListener("click", () => {
+  stopListeners(); EVENT_ID = null; currentTeam=null; adminUnlocked=false;
+  el("planningScreen").classList.add("hidden"); el("teamScreen").classList.remove("hidden");
+  window.scrollTo(0,0);
+});
+
 const reserveDialog = el("reserveDialog");
 const adminDialog = el("adminDialog");
 
@@ -41,6 +120,7 @@ function regsForSlot(slotId) {
 }
 
 function render() {
+  if (!EVENT_ID) return;
   slotsEl.innerHTML = slots.map(slot => {
     const regs = regsForSlot(slot.id);
     const full = regs.length >= slot.quota;
@@ -93,7 +173,7 @@ function render() {
 
 window.openSignup = function(slotId) {
   const slot = slots.find(s => s.id === slotId);
-  if (!slot) return;
+  if (!slot || !eventDate) return;
 
   if (regsForSlot(slot.id).length >= slot.quota) {
     showToast("Ce créneau est déjà complet.");
@@ -119,9 +199,9 @@ el("signupForm").addEventListener("submit", async (e) => {
 
   const slot = slots.find(s => s.id === slotId);
 
-  if (!slot || !firstName || !lastName) return;
+  if (!slot || !firstName || !lastName || !eventDate || !EVENT_ID) return;
 
-  const slotRef = db.ref(`barEvents/${EVENT_ID}/slots/${slotId}/registrations`);
+  const slotRef = db.ref(`${eventPath()}/slots/${slotId}/registrations`);
 
   try {
     const result = await slotRef.transaction((current) => {
@@ -199,7 +279,7 @@ el("reserveForm").addEventListener("submit", async (e) => {
     ...document.querySelectorAll('input[name="reserveSlot"]:checked')
   ].map(input => input.value);
 
-  if (!firstName || !lastName) return;
+  if (!firstName || !lastName || !eventDate || !EVENT_ID) return;
 
   if (!selectedSlots.length) {
     el("reserveError").textContent = "Sélectionnez au moins un créneau.";
@@ -207,7 +287,7 @@ el("reserveForm").addEventListener("submit", async (e) => {
   }
 
   try {
-    const newRef = db.ref(`barEvents/${EVENT_ID}/reserve`).push();
+    const newRef = db.ref(`${eventPath()}/reserve`).push();
 
     await newRef.set({
       firstName,
@@ -256,6 +336,7 @@ el("adminLoginBtn").addEventListener("click", () => {
 });
 
 function renderAdmin() {
+  el("eventDateInput").value = eventDate;
   el("adminList").innerHTML = slots.map(slot => {
     const regs = regsForSlot(slot.id);
 
@@ -313,7 +394,7 @@ window.deleteReserveRegistration = async function(id) {
   if (!confirm("Supprimer cette disponibilité ?")) return;
 
   try {
-    await db.ref(`barEvents/${EVENT_ID}/reserve/${id}`).remove();
+    await db.ref(`${eventPath()}/reserve/${id}`).remove();
     showToast("Disponibilité supprimée.");
   } catch (error) {
     console.error(error);
@@ -338,39 +419,12 @@ window.deleteRegistration = async function(slotId, registrationId) {
   }
 };
 
-// Affiche immédiatement les créneaux, même si la base est encore vide.
-render();
+el("saveDateBtn").addEventListener("click", async () => {
+  if (!adminUnlocked || !EVENT_ID) return;
+  const date = el("eventDateInput").value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { showToast("Veuillez sélectionner une date valide."); return; }
+  try { await db.ref(`${eventPath()}/meta/date`).set(date); showToast("Date enregistrée."); }
+  catch (error) { console.error(error); showToast("Impossible d’enregistrer la date."); }
+});
 
 
-db.ref(`barEvents/${EVENT_ID}/reserve`).on(
-  "value",
-  (snapshot) => {
-    reserveRegistrations = snapshot.val() || {};
-    updateReserveCount();
-
-    if (adminUnlocked) {
-      renderAdmin();
-    }
-  },
-  (error) => {
-    console.error("Firebase reserve read error:", error);
-  }
-);
-
-db.ref(`barEvents/${EVENT_ID}/slots`).on(
-  "value",
-  (snapshot) => {
-    const data = snapshot.val() || {};
-    registrations = {};
-
-    Object.keys(data).forEach(slotId => {
-      registrations[slotId] = data[slotId]?.registrations || {};
-    });
-
-    render();
-  },
-  (error) => {
-    console.error("Firebase read error:", error);
-    showToast("Connexion Firebase impossible. Vérifiez les règles Realtime Database.");
-  }
-);
