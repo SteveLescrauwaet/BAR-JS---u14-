@@ -18,3 +18,7 @@ La connexion à Supabase est déjà renseignée dans `config.js` : URL du projet
 
 ## 5. Sécurité
 Les écritures passent par des fonctions serveur et les tables ne sont pas lisibles directement via REST. Le mot de passe responsable est vérifié côté SQL (empreinte bcrypt). Les listes nominatives des inscriptions sont publiques pour les utilisateurs de l'application, conformément à son usage. Il n'y a pas de compte parent ; prévoir CAPTCHA / anti-abus ou authentification si l'app est exposée largement. Ne jamais mettre une clé `service_role` ou `sb_secret_` dans `config.js`.
+
+
+## Ajustement du premier créneau (novembre 2026)
+Le premier créneau est désormais affiché comme « Ouverture du bar (1 h avant le premier match) → 12h00 ». Son identifiant technique `09-12` reste inchangé pour conserver les inscriptions et les quotas dans Supabase. La date/heure du premier match n’est pas calculée par l’application : le libellé est une consigne d’arrivée. Le champ mot de passe administrateur utilise le clavier alphanumérique sur mobile.

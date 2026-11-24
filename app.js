@@ -8,7 +8,7 @@ const TEAMS = [
  ['u16-hommes','U16 Hommes'],['u16-awbb-dames','U16 AWBB Dames'],['u16-b-dames','U16 B Dames'],
  ['u18-hommes','U18 Hommes'],['u21-hommes','U21 Hommes'],['p4-hommes','P4 Hommes'],['p3-hommes','P3 Hommes'],['p2-hommes','P2 Hommes'],['veterans','Vétérans']
 ];
-const slots=[{id:'09-12',label:'09h00 → 12h00',quota:4},{id:'12-15',label:'12h00 → 15h00',quota:4},{id:'15-18',label:'15h00 → 18h00',quota:3},{id:'18-fin',label:'18h00 → fin',quota:3}];
+const slots=[{id:'09-12',label:'Ouverture du bar (1 h avant le premier match) → 12h00',quota:4},{id:'12-15',label:'12h00 → 15h00',quota:4},{id:'15-18',label:'15h00 → 18h00',quota:3},{id:'18-fin',label:'18h00 → fin',quota:3}];
 const el=id=>document.getElementById(id);
 let team=null, eventDate='', registrations={}, reserveRegistrations={},adminPassword='',refreshTimer=null,requestSequence=0;
 const signupDialog=el('signupDialog'),reserveDialog=el('reserveDialog'),adminDialog=el('adminDialog');
